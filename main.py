@@ -1,4 +1,5 @@
 from utils.bank_operations import *
+from utils.utils import *
 
 menu = """
 ================ MENU ================
@@ -24,16 +25,16 @@ while True:
         # ==== DEPÓSITO ====
         case "d":
             depositar = depositar_valor(input("Depositar: R$ "))
-            if(depositar[0] == False):
-                print(depositar[1])
+            if(isinstance(depositar, (int))):
+                print(formatar_erro(depositar))
                 continue
             saldo_atual += depositar[1]
             extrato_historico.append(depositar[0])
         # ==== SAQUE ====
         case "s":
             saque = sacar_valor(valor=input("Sacar: R$ "),numeros_saques=quantidade_saques_realizados,limiteDeSaques=LIMITE_SAQUES_DIARIOS,limitePorSaque=limite_por_saque,saldo=saldo_atual)
-            if(depositar[0] == False):
-                print(saque[1])
+            if(isinstance(saque, (int))):
+                print(formatar_erro(saque,limite_por_saque=limite_por_saque))
                 continue
             saldo_atual                  -= saque[1]
             quantidade_saques_realizados += 1

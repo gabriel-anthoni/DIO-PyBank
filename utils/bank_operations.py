@@ -4,26 +4,26 @@ def depositar_valor(valor,/):
     try:
         valor = float(valor)
     except ValueError:
-        return [False,"Operação falhou! O valor informado é inválido."]
+        return 1
     if(valor > 0):
         return [f"Depósito:   R$ {valor:.2f}",valor]
     else:
-        return [False,"Operação falhou! O valor informado é inválido."]
+        return 1
 
 # ============================ SAQUE =============================
 def sacar_valor(*,valor:float,numeros_saques:int,limiteDeSaques:int,limitePorSaque:float,saldo:float):
     try:
         valor = float(valor)
     except ValueError:
-        return [False,"Operação falhou! O valor informado é inválido."]
+        return 1
     if(numeros_saques == limiteDeSaques):
-        return [False,"Operação falhou! Você atingiu o limite máximo de saques diários."]
+        return 2
     elif(valor < 0):
-        return [False,"Operação falhou! O valor informado é inválido."]
+        return 1
     elif(valor > saldo):
-        return [False,"Operação falhou! Você não tem saldo suficiente para realizar esse saque."]
+        return 3
     elif(valor > limitePorSaque):
-        return [False,f"Operação falhou! O valor solicitado excede o limite de R$ {limite_por_saque:.2f} por saque."]
+        return 4
     else:
         return [f"Saque:      R$ {valor:.2f}",valor]
 
