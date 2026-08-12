@@ -12,3 +12,16 @@ def formatar_erro(erro:int, *,limite_por_saque=0):
             return f"Limite ultrapassado! Cada saque pode ser de no máximo R$ {limite_por_saque:.2f}."
         case _:
             return "Não foi possível processar a solicitação no momento."
+
+# ========================== TRANSAÇÃO ===========================
+def registrar_transacao( *,transacao, extrato_historico):
+    transacao_registrada_hoje = False
+
+    for registro in extrato_historico:
+        if transacao["Data"] in registro.keys():
+            transacao_registrada_hoje = True
+            registro[str(transacao["Data"])].append(transacao["Texto"])
+            break
+    
+    if not transacao_registrada_hoje:
+        extrato_historico.append({f"{transacao["Data"]}": [transacao["Texto"]]})
