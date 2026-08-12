@@ -7,6 +7,9 @@ menu = """
   [D] Depositar
   [S] Sacar
   [E] Extrato
+  [U] Criar Usuário
+  [C] Criar Conta Corrente
+  [L] Listar Contas
   [Q] Sair
 ======================================
 """
@@ -16,7 +19,8 @@ limite_por_saque             = 500.00
 saldo_atual                  = 0.00
 extrato_historico            = []
 quantidade_saques_realizados = [0,date.today().strftime("%d/%m/%Y")]
-clientes                     = []
+usuarios                     = []
+contas_correntes             = [0,[]]
 
 # ============================ MENU ==============================
 while True:
@@ -25,12 +29,12 @@ while True:
     match opcao:
         # ==== DEPÓSITO ====
         case "d":
-            depositar = depositar_valor(input("Depositar: R$ "))
-            if(isinstance(depositar, (int))):
-                print(formatar_erro(depositar))
+            deposito = depositar_valor(input("Depositar: R$ "))
+            if(isinstance(deposito, (int))):
+                print(formatar_erro(deposito))
                 continue
-            saldo_atual += depositar["Valor"]
-            registrar_transacao(transacao=depositar, extrato_historico=extrato_historico)
+            saldo_atual += deposito["Valor"]
+            registrar_transacao(transacao=deposito, extrato_historico=extrato_historico)
                 
         # ==== SAQUE ====
         case "s":
@@ -50,9 +54,26 @@ while True:
         # ==== EXTRATO ====
         case "e":
             exibir_extrato(saldo_atual,lista_extrato=extrato_historico)
+        
+        # ==== CADASTRAR USUÁRIO ====
+        case "u":
+            novo_usuario = cadastrar_usuario(usuarios)
+            usuarios.append(novo_usuario)
+        
+        # ==== CADASTRAR CONTA ====
+        case "c":
+            nova_conta = cadastrar_conta(usuarios,contas_correntes)
+            if nova_conta != None:
+                contas_correntes[1].append(nova_conta)
+        
+        # ==== LISTAR CONTAS ====
+        case "l":
+            exibir_contas(usuarios,contas_correntes)
+        
         # ==== SAIR =====
         case "q":
             break
+        
         # ==== ERROR ====
         case _:
             print("Opção inválida! Por favor, escolha uma das opções do menu.")
