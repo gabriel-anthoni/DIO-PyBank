@@ -1,3 +1,4 @@
+import os
 
 # ============================ ERROS =============================
 def formatar_erro(erro:int, *,limite_por_saque=0):
@@ -25,3 +26,7 @@ def registrar_transacao( *,transacao, extrato_historico):
     
     if not transacao_registrada_hoje:
         extrato_historico.append({f"{transacao["Data"]}": [transacao["Texto"]]})
+
+# ======================= LIMPAR TERMINAL =======================
+def limpar_terminal():
+    os.system("cls" if os.name == "nt" else "clear")

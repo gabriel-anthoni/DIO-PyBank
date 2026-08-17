@@ -36,20 +36,21 @@ def sacar_valor(*,valor:float,numeros_saques:list,limiteDeSaques:int,limitePorSa
 
 # =========================== EXTRATO ============================
 def exibir_extrato(saldo_atual: float, /, *, lista_extrato: list):
-    print("=========== EXTRATO ===========")
+    print("╔═════════════════════════════════════╗")
     
     if lista_extrato == []:
         print("Nenhuma movimentação realizada até o momento.")
     else:
         for _ in lista_extrato:
             data = list(_.keys())
-            print(data[0])
+            print(f"╟─{data[0]}──────────────────────────╢")
             for i in _[data[0]]:
-                print(i)
+                print(f"╟─{i}{" "*(7-(len(i)-28))} ║")
 
-    print("-------------------------------")
-    print(f"Saldo: R$ {saldo_atual:.2f}")
-    print("===============================")
+    print("╟─────────────────────────────────────╢")
+    print(f"║ Saldo: R$ {saldo_atual:.2f}{" "*(25-len(f"{saldo_atual:.2f}"))} ║")
+    print("╚═════════════════════════════════════╝")
+    
 
 # ====================== CADASTRAR USUÁRIO =======================
 def cadastrar_usuario(lista_de_usuarios: list):
@@ -185,12 +186,15 @@ def exibir_contas(lista_de_usuarios: list, lista_de_contas: list):
         print("É necessário ter pelo menos um usuário e uma conta cadastrados.")
         return
 
-    print("+-------------------+-------------------+-----------------+")
+    print("┌───────────────────┬───────────────────┬─────────────────┐")
     print("| Numero da conta:  | Dono:             | CPF:            |")
-    print("+-------------------+-------------------+-----------------+")
+    print("├───────────────────┼───────────────────┼─────────────────┤")
 
+    ultima_linha = len(lista_de_contas[1])
+    linha        = 0
     for conta in lista_de_contas[1]:
         donodaconta = None
+        linha += 1
         
         for usuario in lista_de_usuarios:
             if usuario['CPF'] == conta['UsuarioCPF']:
@@ -203,4 +207,7 @@ def exibir_contas(lista_de_usuarios: list, lista_de_contas: list):
             cpf = donodaconta['CPF']
 
             print(f"| {num_conta:<17} | {nome:<17} | {cpf:<15} |")
-            print("+-------------------+-------------------+-----------------+")
+            if(ultima_linha == linha):
+                print("└───────────────────┴───────────────────┴─────────────────┘")
+            else:
+                print("├───────────────────┼───────────────────┼─────────────────┤")
