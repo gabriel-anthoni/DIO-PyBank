@@ -48,6 +48,7 @@ dio_pybank/
 │   ├── bank_operations.py  # Lógica central das transações (saque, depósito, extrato)
 │   └── utils.py            # Funções utilitárias (formatação de erro, validações)
 ├── .gitignore
+├── LICENSE                 # Termos da Licença MIT
 └── README.md               # Documentação do repositório
 ```
 
