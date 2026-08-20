@@ -1,89 +1,117 @@
 from utils.bank_operations import *
 from utils.utils import *
+from utils.bank_models import *
 from datetime import date
 
-menu = """
-╔═══════════════[MENU]════════════════╗
-╟─[D] Depositar                       ║
-╟─[S] Sacar                           ║
-╟─[E] Extrato                         ║
-╟─[U] Criar Usuário                   ║
-╟─[C] Criar Conta Corrente            ║
-╟─[L] Listar Contas                   ║
-╟─[Q] Sair                            ║
-╠═════════════════════════════════════╝\n║"""
+def main():
+    clientes = []
+    contas = []
 
-LIMITE_SAQUES_DIARIOS        = 3
-limite_por_saque             = 500.00
-saldo_atual                  = 0.00
-extrato_historico            = []
-quantidade_saques_realizados = [0,date.today().strftime("%d/%m/%Y")]
-usuarios                     = []
-contas_correntes             = [0,[]]
+    menu = """
+    ╔═══════════════[MENU]════════════════╗
+    ╟─[D] Depositar                       ║
+    ╟─[S] Sacar                           ║
+    ╟─[E] Extrato                         ║
+    ╟─[U] Criar Usuário                   ║
+    ╟─[C] Criar Conta Corrente            ║
+    ╟─[L] Listar Contas                   ║
+    ╟─[Q] Sair                            ║
+    ╠═════════════════════════════════════╝\n"""
 
-# ============================ MENU ==============================
-while True:
-    print(menu)
-    opcao = input("╙─ Escolha uma opção: ").lower()
-    match opcao:
-        # ==== DEPÓSITO ====
-        case "d":
-            limpar_terminal()
-            deposito = depositar_valor(input("Depositar: R$ "))
-            if(isinstance(deposito, (int))):
-                print(formatar_erro(deposito))
-                continue
-            saldo_atual += deposito["Valor"]
-            registrar_transacao(transacao=deposito, extrato_historico=extrato_historico)
-            limpar_terminal()
-                
-        # ==== SAQUE ====
-        case "s":
-            limpar_terminal()
-            data = date.today().strftime("%d/%m/%Y")
+    while True:
+        print(menu, end="")
+        opcao = input("    ╙─ Escolha uma opção: ").lower().strip()
 
-            if data != quantidade_saques_realizados[1]:
-                quantidade_saques_realizados = [0,data] 
+        match opcao:
+            case "d":
+                cpf = input("Informe o CPF do cliente: ")
+                cliente = filtrar_cliente(cpf, clientes)
 
-            saque = sacar_valor(valor=input("Sacar: R$ "),numeros_saques=quantidade_saques_realizados,limiteDeSaques=LIMITE_SAQUES_DIARIOS,limitePorSaque=limite_por_saque,saldo=saldo_atual)
-            if(isinstance(saque, (int))):
-                print(formatar_erro(saque,limite_por_saque=limite_por_saque))
-                continue
-            saldo_atual                  -= saque["Valor"]
-            quantidade_saques_realizados[0] += 1
-            registrar_transacao(transacao=saque, extrato_historico=extrato_historico)
-            limpar_terminal()
-            
-        # ==== EXTRATO ====
-        case "e":
-            limpar_terminal()
-            exibir_extrato(saldo_atual,lista_extrato=extrato_historico)
-        
-        # ==== CADASTRAR USUÁRIO ====
-        case "u":
-            limpar_terminal()
-            novo_usuario = cadastrar_usuario(usuarios)
-            usuarios.append(novo_usuario)
-            limpar_terminal()
-        
-        # ==== CADASTRAR CONTA ====
-        case "c":
-            limpar_terminal()
-            nova_conta = cadastrar_conta(usuarios,contas_correntes)
-            if nova_conta != None:
-                contas_correntes[1].append(nova_conta)
-            limpar_terminal()
-        
-        # ==== LISTAR CONTAS ====
-        case "l":
-            limpar_terminal()
-            exibir_contas(usuarios,contas_correntes)
-        
-        # ==== SAIR =====
-        case "q":
-            break
-        
-        # ==== ERROR ====
-        case _:
-            limpar_terminal()
-            print("Opção inválida! Por favor, escolha uma das opções do menu.")
+                if not cliente:
+                    print("\n[Cliente não encontrado!]")
+                    continue
+
+                try:
+                    valor = float(input("Depositar: R$ "))
+                except ValueError:
+                    print("\n[Valor inválido.]")
+                    continue
+
+                transacao = Deposito(valor)
+                conta = recuperar_conta_cliente(cliente)
+                if not conta:
+                    continue
+
+                cliente.realizar_transacao(conta, transacao)
+
+            case "s":
+                cpf = input("Informe o CPF do cliente: ")
+                cliente = filtrar_cliente(cpf, clientes)
+
+                if not cliente:
+                    print("\n[Cliente não encontrado!]")
+                    continue
+
+                try:
+                    valor = float(input("Sacar: R$ "))
+                except ValueError:
+                    print("\n[Valor inválido.]")
+                    continue
+
+                transacao = Saque(valor)
+                conta = recuperar_conta_cliente(cliente)
+                if not conta:
+                    continue
+
+                cliente.realizar_transacao(conta, transacao)
+
+            case "e":
+                cpf = input("Informe o CPF do cliente: ")
+                cliente = filtrar_cliente(cpf, clientes)
+
+                if not cliente:
+                    print("\n[Cliente não encontrado!]")
+                    continue
+
+                conta = recuperar_conta_cliente(cliente)
+                if not conta:
+                    continue
+
+                print("\n================ EXTRATO ================")
+                transacoes = conta.historico.transacoes
+
+                if not transacoes:
+                    print("Não foram realizadas movimentações.")
+                else:
+                    for t in transacoes:
+                        print(f"{t.__class__.__name__}:\t\tR$ {t.valor:.2f}")
+
+                print(f"\nSaldo:\t\tR$ {conta.saldo:.2f}")
+                print("==========================================")
+
+            case "u":
+                nova_conta(clientes)
+
+            case "c":
+                criar_conta_corrente(clientes,contas)
+
+            case "l":
+                if not contas:
+                    print("\n[Nenhuma conta cadastrada.]")
+                    continue
+
+                for conta in contas:
+                    print("=" * 40)
+                    print(f"Agência:\t{conta.agencia}")
+                    print(f"C/C:\t\t{conta.numero}")
+                    print(f"Titular:\t{conta.cliente.nome}")
+
+            case "q":
+                print("\nAté logo!")
+                break
+
+            case _:
+                print("\n[Opção inválida! Tente novamente.]")
+
+if __name__ == "__main__":
+    main()
