@@ -1,60 +1,25 @@
 from datetime import datetime
+from .utils import validar_cpf,formatar_numero
 
-# =========================== DEPÓSITO ===========================
-def depositar_valor(valor,/):
-    try:
-        valor = float(valor)
-    except ValueError:
-        return 1
-    if(valor > 0):
-        data_deposito = datetime.now()
-        horario       = data_deposito.time().strftime("%H:%M:%S")
-        data          = data_deposito.strftime("%d/%m/%Y")
-        return {"Texto":f"[{horario}] Depósito: R$ {valor:.2f}","Valor":valor,"Data":data}
-    else:
-        return 1
-
-# ============================ SAQUE =============================
-def sacar_valor(*,valor:float,numeros_saques:list,limiteDeSaques:int,limitePorSaque:float,saldo:float):
-    try:
-        valor = float(valor)
-    except ValueError:
-        return 1
-    if(numeros_saques[0] == limiteDeSaques):
-        return 2
-    elif(valor < 0):
-        return 1
-    elif(valor > saldo):
-        return 3
-    elif(valor > limitePorSaque):
-        return 4
-    else:
-        data_saque    = datetime.now()
-        horario       = data_saque.time().strftime("%H:%M:%S")
-        data          = data_saque.strftime("%d/%m/%Y")
-        return {"Texto":f"[{horario}] Saque:    R$ {valor:.2f}","Valor":valor,"Data":data}
-
-# =========================== EXTRATO ============================
-def exibir_extrato(saldo_atual: float, /, *, lista_extrato: list):
+# =========================== EXTRATO ===========================
+def exibir_extrato(saldo_atual: float, dict_extrato: list):
     print("╔═════════════════════════════════════╗")
     
-    if lista_extrato == []:
-        print("Nenhuma movimentação realizada até o momento.")
+    if dict_extrato == {}:
+        print("║ Nenhuma movimentação realizada      ║\n║ até o momento.                      ║")
     else:
-        for _ in lista_extrato:
-            data = list(_.keys())
-            print(f"╟─{data[0]}──────────────────────────╢")
-            for i in _[data[0]]:
+        for data in dict_extrato.keys():
+            print(f"╟─{data}──────────────────────────╢")
+            for i in dict_extrato[data]:
                 print(f"╟─{i}{" "*(7-(len(i)-28))} ║")
 
     print("╟─────────────────────────────────────╢")
-    print(f"║ Saldo: R$ {saldo_atual:.2f}{" "*(25-len(f"{saldo_atual:.2f}"))} ║")
+    print(f"║ Saldo: R$ {formatar_numero(saldo_atual)}{" "*(25-len(f"{formatar_numero(saldo_atual)}"))} ║")
     print("╚═════════════════════════════════════╝")
-    
 
-# ====================== CADASTRAR USUÁRIO =======================
+# ====================== CADASTRAR USUÁRIO ======================
 def cadastrar_usuario(lista_de_usuarios: list):
-
+    
     ESTADOS_VALIDOS = [
     "AC", "AL", "AP", "AM", "BA", "CE", "DF", "ES", "GO", "MA",
     "MT", "MS", "MG", "PA", "PB", "PR", "PE", "PI", "RJ", "RN",
@@ -85,22 +50,13 @@ def cadastrar_usuario(lista_de_usuarios: list):
         cpf_existe = False
         if lista_de_usuarios != []:
             for usuario in lista_de_usuarios:
-                if usuario["CPF"] == cpf:
+                if usuario.cpf == cpf:
                     cpf_existe = True
                     break
             if cpf_existe:
                 continue
         
-        if (
-            len(cpf) == 14      and
-            cpf[0:3].isdigit()  and
-            cpf[3] == "."       and
-            cpf[4:7].isdigit()  and
-            cpf[7] == "."       and
-            cpf[8:11].isdigit() and
-            cpf[11] == "-"      and
-            cpf[12:14].isdigit()
-        ):
+        if (validar_cpf(cpf)):
             break
         else:
             print("Formatagem do CPF inválida!")
@@ -129,85 +85,85 @@ def cadastrar_usuario(lista_de_usuarios: list):
             print("Sigla de estado inválida.")
 
     novo_usuario = {
-        "CPF": cpf,
-        "Nome": nome,
-        "DataDeNascimento": data_de_nascimento,
-        "Endereço": f"{rua}, {nrm}, {bairro}, {cidade}/{sigla_estado}"
+        "nome": nome,
+        "dataDeNascimento": data_de_nascimento,
+        "cpf": cpf,
+        "endereço": f"{rua}, {nrm}, {bairro}, {cidade}/{sigla_estado}"
     }
 
     return novo_usuario
 
-# ======================= CADASTRAR CONTA ========================
-def cadastrar_conta(lista_de_usuarios: list, lista_de_contas:list):
-    if lista_de_usuarios == []:
-        print("Não existem usuarios no Sistema.")
-        return None
+# ===================== REGISTRAR TRANSAÇÃO =====================
+def registrar_transacao(hora,valor,tipo:str = "Deposito"):
+    novo_valor = formatar_numero(valor)
+    if tipo == "Deposito":
+        return f"[{hora}] {tipo}: R$ {novo_valor}"
+    elif tipo == "Saque":
+        return f"[{hora}] {tipo}:    R$ {novo_valor}"
 
-    while True:
-        print("Digite seu CPF no formato: XXX.XXX.XXX-XX")
-        cpf = input("CPF: ").strip()
+# ======================= VERIFICAR SAQUE =======================
+def verificar_saque(valor,conta:Conta):
+    if valor > conta.limite:
+        return [False,"limite por saque excedido"]
 
-        cpf_existe = False
-        for usuario in lista_de_usuarios:
-            if usuario["CPF"] == cpf:
-                cpf_existe = True
-                break
-        if not cpf_existe:
-            print("não existe usuario no nosso sistema com esse CPF")
-            return None
-            
-        
-        if (
-            len(cpf) == 14      and
-            cpf[0:3].isdigit()  and
-            cpf[3] == "."       and
-            cpf[4:7].isdigit()  and
-            cpf[7] == "."       and
-            cpf[8:11].isdigit() and
-            cpf[11] == "-"      and
-            cpf[12:14].isdigit()
-        ):
-            break
-        else:
-            print("Formatagem do CPF inválida!")
-    lista_de_contas[0] += 1
+    if valor > conta.saldo:
+        return [False,"saldo insuficiente"] 
     
-    conta = {
-        "NumeroDaConta":lista_de_contas[0],
-        "Agencia":"001",
-        "UsuarioCPF": cpf
-    }
+    data = datetime.today().date()
+    if conta.data_ultimo_saque != data:
+        conta.alterar_data_ultimo_saque()
+    
+    if (conta.data_ultimo_saque == data) and (conta.limite_saques == conta.saques_realizados):
+        return [False,"limite diário atingido"]
+    
+    conta.aumentar_saques_realizados()
+    return [True]
 
-    return conta
+# ===================== PROCESSAR TRANSAÇÃO =====================
+def processar_transacao(valor,contas:list,numero_conta:int,operacao: str = "Deposito"):
+    try:
+        valor = float(valor)
+        for _ in contas:
 
-# ======================== LISTAR CONTAS =========================
-def exibir_contas(lista_de_usuarios: list, lista_de_contas: list):
-    if not lista_de_usuarios or lista_de_contas[0] == 0:
-        print("É necessário ter pelo menos um usuário e uma conta cadastrados.")
-        return
+            if _.numero_conta == numero_conta:
+                if operacao == "Deposito":
+                    _.depositar(valor)
+
+                elif operacao == "Saque":
+                    saque_valido = verificar_saque(valor,_)
+                    if saque_valido[0]:
+                        _.sacar(valor)
+                    else:
+                        return saque_valido[1]
+
+                return f"{operacao} de R$ {formatar_numero(valor)} realizada com sucesso para a conta {_.numero_conta}."
+    except ValueError:
+        return "VALOR ERRADO"
+
+# ======================== LISTAR CONTAS ========================
+def exibir_contas(lista_de_contas: list):
 
     print("┌───────────────────┬───────────────────┬─────────────────┐")
     print("| Numero da conta:  | Dono:             | CPF:            |")
     print("├───────────────────┼───────────────────┼─────────────────┤")
 
-    ultima_linha = len(lista_de_contas[1])
+    ultima_linha = len(lista_de_contas)
     linha        = 0
-    for conta in lista_de_contas[1]:
-        donodaconta = None
+    for conta in lista_de_contas:
         linha += 1
-        
-        for usuario in lista_de_usuarios:
-            if usuario['CPF'] == conta['UsuarioCPF']:
-                donodaconta = usuario
-                break
 
-        if donodaconta:
-            num_conta = str(conta['NumeroDaConta'])
-            nome = donodaconta['Nome']
-            cpf = donodaconta['CPF']
+        print(f"| {conta.numero_conta}{" "*(7-(len(str(conta.numero_conta))-10))} | {conta.cliente.nome}{" "*(7-(len(str(conta.cliente.nome))-10))} | {conta.cliente.cpf}{" "*(7-(len(str(conta.cliente.cpf))-8))} |")
+        if(ultima_linha == linha):
+            print("└───────────────────┴───────────────────┴─────────────────┘")
+        else:
+            print("├───────────────────┼───────────────────┼─────────────────┤")
 
-            print(f"| {num_conta:<17} | {nome:<17} | {cpf:<15} |")
-            if(ultima_linha == linha):
-                print("└───────────────────┴───────────────────┴─────────────────┘")
-            else:
-                print("├───────────────────┼───────────────────┼─────────────────┤")
+# =================== BUSCAR DATA DA TRANSAÇÃO ==================
+def buscar_data_transacao(conta:Conta):
+    dataEhora = datetime.now()
+    data = dataEhora.strftime("%d/%m/%Y")
+    hora = dataEhora.strftime("%H:%M:%S")
+    for _ in conta.extrato.ver_chaves():
+        if _ == data:
+            return [True,data,hora]
+    return [False,data,hora]

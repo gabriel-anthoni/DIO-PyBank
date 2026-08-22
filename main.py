@@ -1,6 +1,6 @@
 from utils.bank_operations import *
+from utils.models import *
 from utils.utils import *
-from datetime import date
 
 menu = """
 ╔═══════════════[MENU]════════════════╗
@@ -13,74 +13,93 @@ menu = """
 ╟─[Q] Sair                            ║
 ╠═════════════════════════════════════╝\n║"""
 
-LIMITE_SAQUES_DIARIOS        = 3
-limite_por_saque             = 500.00
-saldo_atual                  = 0.00
-extrato_historico            = []
-quantidade_saques_realizados = [0,date.today().strftime("%d/%m/%Y")]
-usuarios                     = []
-contas_correntes             = [0,[]]
+contas   = [1,[]]
+usuarios = []
 
-# ============================ MENU ==============================
 while True:
     print(menu)
     opcao = input("╙─ Escolha uma opção: ").lower()
     match opcao:
         # ==== DEPÓSITO ====
-        case "d":
+        case 'd':
             limpar_terminal()
-            deposito = depositar_valor(input("Depositar: R$ "))
-            if(isinstance(deposito, (int))):
-                print(formatar_erro(deposito))
+
+            if contas[1] == []:
+                print("Nenhuma conta cadastrada no momento.")
                 continue
-            saldo_atual += deposito["Valor"]
-            registrar_transacao(transacao=deposito, extrato_historico=extrato_historico)
-            limpar_terminal()
-                
+
+            numero_conta = int(input("Número da conta:"))
+            if procurar_numero_conta(numero_conta,contas[1]):
+                valor = input("R$ ")
+                print(processar_transacao(valor,contas[1],numero_conta,"Deposito"))
+            else:
+                print("Não existe")
+
         # ==== SAQUE ====
-        case "s":
+        case 's':
             limpar_terminal()
-            data = date.today().strftime("%d/%m/%Y")
 
-            if data != quantidade_saques_realizados[1]:
-                quantidade_saques_realizados = [0,data] 
-
-            saque = sacar_valor(valor=input("Sacar: R$ "),numeros_saques=quantidade_saques_realizados,limiteDeSaques=LIMITE_SAQUES_DIARIOS,limitePorSaque=limite_por_saque,saldo=saldo_atual)
-            if(isinstance(saque, (int))):
-                print(formatar_erro(saque,limite_por_saque=limite_por_saque))
+            if contas[1] == []:
+                print("Nenhuma conta cadastrada no momento.")
                 continue
-            saldo_atual                  -= saque["Valor"]
-            quantidade_saques_realizados[0] += 1
-            registrar_transacao(transacao=saque, extrato_historico=extrato_historico)
-            limpar_terminal()
-            
+
+            numero_conta = int(input("Número da conta:"))
+            if procurar_numero_conta(numero_conta,contas[1]):
+                valor = input("R$ ")
+                print(processar_transacao(valor,contas[1],numero_conta,"Saque"))
+            else:
+                print("Conta não encontrada.")
+
         # ==== EXTRATO ====
-        case "e":
+        case 'e':
             limpar_terminal()
-            exibir_extrato(saldo_atual,lista_extrato=extrato_historico)
-        
+
+            if contas[1] == []:
+                print("Nenhuma conta cadastrada no momento.")
+                continue
+
+            numero_conta = int(input("Número da conta:"))
+            for _ in contas[1]:
+                if _.numero_conta == numero_conta:
+                    exibir_extrato(_.saldo,_.retornar_extrato())
+
         # ==== CADASTRAR USUÁRIO ====
-        case "u":
+        case 'u':
             limpar_terminal()
-            novo_usuario = cadastrar_usuario(usuarios)
-            usuarios.append(novo_usuario)
-            limpar_terminal()
-        
+            usuario = cadastrar_usuario(usuarios)
+            usuario = PessoaFisica(
+                usuario['nome'],
+                usuario['dataDeNascimento'],
+                usuario['cpf'],
+                usuario['endereço'])
+            usuarios.append(usuario)
+
         # ==== CADASTRAR CONTA ====
-        case "c":
+        case 'c':
             limpar_terminal()
-            nova_conta = cadastrar_conta(usuarios,contas_correntes)
-            if nova_conta != None:
-                contas_correntes[1].append(nova_conta)
-            limpar_terminal()
+
+            if usuarios == []:
+                print("Nenhum usuário cadastrado")
+                continue
+            
+            cpf = input("CPF:")
+            for _ in usuarios:
+                if _.cpf == cpf:
+                    conta = Conta(contas[0],_)
+                    contas[0] += 1
+                    contas[1].append(conta)
         
         # ==== LISTAR CONTAS ====
-        case "l":
+        case 'l':
             limpar_terminal()
-            exibir_contas(usuarios,contas_correntes)
-        
+            if contas[1] == []: 
+                print("Nenhuma conta cadastrada no momento.")
+                continue
+            exibir_contas(contas[1])
+            
         # ==== SAIR =====
-        case "q":
+        case 'q':
+            limpar_terminal()
             break
         
         # ==== ERROR ====
