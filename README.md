@@ -26,16 +26,16 @@
 </table>
 
 ## ⚙️ Funcionalidades e Regras de Negócio
-
 ### 1. Operações Bancárias
-* **Depósito:** Aceita apenas valores positivos. Registra a data/hora exata da transação.
-* **Saque:** Respeita o saldo disponível, o valor máximo por saque (ex: R$ 500,00) e o limite de saques diários.
-* **Extrato:** Lista o histórico completo de movimentações e exibe o saldo final.
+* **Identificação por Conta:** Para realizar qualquer operação (Depósito, Saque ou Extrato), o sistema solicita primeiro o Número da Conta para vincular a transação à conta correta.
+* **Depósito:** Solicita o número da conta e o valor. Aceita apenas valores positivos e registra a data/hora exata da transação no extrato específico daquela conta.
+* **Saque:** Solicita o número da conta e o valor. Valida o saldo disponível da conta, o limite por operação (ex: R$ 500,00) e o limite de saques diários daquela conta.
+* **Extrato:** Solicita o número da conta e exibe o histórico completo de movimentações e o saldo final atualizado correspondente a ela.
 
 ### 2. Gestão de Clientes e Contas
 * **Cadastrar Usuário:** Solicita nome, data de nascimento, CPF e endereço. Não permite CPFs duplicados e exige idade mínima de 18 anos.
-* **Cadastrar Conta Corrente:** Cria uma conta vinculada a um CPF já existente. Agência padrão é `"001"` e o número da conta é gerado sequencialmente (`1, 2, 3...`).
-* **Exibir Contas:** Formatação em tabela exibindo número da conta, agência e dados do titular correspondente.
+* **Cadastrar Conta Corrente:** Cria uma conta vinculada a um CPF já cadastrado. A agência padrão é `"001"` e o número da conta é gerado de forma sequencial automática (`1, 2, 3...`).
+* **Exibir Contas:** Apresenta uma tabela estruturada com o número da conta, agência e os dados do titular associado.
 
 ---
 
@@ -46,6 +46,7 @@ dio_pybank/
 ├── main.py                 # Interface CLI, menu principal e controle de fluxo
 ├── utils/
 │   ├── bank_operations.py  # Lógica central das transações (saque, depósito, extrato)
+│   ├── models.py           # Definição das classes da POO (Cliente, PessoaFisica, Conta, Extrato)
 │   └── utils.py            # Funções utilitárias (formatação de erro, validações)
 ├── .gitignore
 ├── LICENSE                 # Termos da Licença MIT
@@ -54,6 +55,6 @@ dio_pybank/
 
 ## 🔮 Próximos Passos
 
-- [ ] Transição para Orientação a Objetos (POO) (Cliente, ContaCorrente, Historico, Transacao).<br/>
+- [x] Transição para Orientação a Objetos (POO) (Cliente, PessoaFisica, Extrato, Conta).<br/>
 - [ ] Persistência de dados em banco de dados SQLite / PostgreSQL.<br/>
 - [ ] Interface gráfica (GUI) com Tkinter/PyQt ou API REST com FastAPI.
