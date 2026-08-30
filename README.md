@@ -81,9 +81,3 @@ dio_pybank/
 ├── LICENSE                 # Termos da Licença MIT
 └── README.md               # Documentação do repositório
 ```
-
-## 🔮 Próximos Passos
-
-- [x] Transição para Orientação a Objetos (POO) (Cliente, PessoaFisica, Extrato, Conta).<br/>
-- [ ] Persistência de dados em banco de dados SQLite / PostgreSQL.<br/>
-- [ ] Interface gráfica (GUI) com Tkinter/PyQt ou API REST com FastAPI.
