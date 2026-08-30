@@ -9,11 +9,11 @@
     <img src="https://img.shields.io/badge/gabriel--anthoni-000000?style=for-the-badge&logo=github" alt="GitHub Profile" />
   </a>
 
-  <br />
+  <br /><br />
 
   ![Python Version](https://img.shields.io/badge/python-3.14.5-blue.svg)
   ![License](https://img.shields.io/badge/license-MIT-green.svg)
-  ![Status](https://img.shields.io/badge/status-em_desenvolvimento-orange.svg)
+  ![Status](https://img.shields.io/badge/status-conclu%C3%ADdo-brightgreen.svg)
 </div>
 
 <br />
